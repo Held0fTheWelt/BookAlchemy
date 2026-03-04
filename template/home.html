@@ -49,9 +49,9 @@
     <div style="width: 100px; height: 140px; background: #eee; display: flex; align-items: center; justify-content: center; color: #666;">No cover</div>
     {% endif %}
     <div>
-      <h3>{{ book.title }}</h3>
+      <h3><a href="{{ url_for('book_detail', book_id=book.id) }}">{{ book.title }}</a></h3>
       <div style="margin: 0.25em 0;">
-        {{ book.author.name }}
+        <a href="{{ url_for('author_detail', author_id=book.author.id) }}">{{ book.author.name }}</a>
         <form method="post" action="{{ url_for('delete_author', author_id=book.author.id) }}" style="display: inline; margin-left: 0.5em;" onsubmit="return confirm('Delete author \"{{ book.author.name }}\" and all their books?');">
           <button type="submit">Delete Author</button>
         </form>

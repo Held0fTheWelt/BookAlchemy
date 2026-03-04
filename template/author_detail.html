@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ author.name }}</title>
+  </head>
+  <body>
+  <p><a href="{{ url_for('index') }}">← Library</a></p>
+
+  <h1>{{ author.name }}</h1>
+  {% if author.birth_date %}<p><strong>Birth date:</strong> {{ author.birth_date.strftime('%B %d, %Y') }}</p>{% endif %}
+  {% if author.date_of_death %}<p><strong>Date of death:</strong> {{ author.date_of_death.strftime('%B %d, %Y') }}</p>{% endif %}
+
+  <h2>Books ({{ books|length }})</h2>
+  {% if books %}
+  <ul>
+    {% for book in books %}
+    <li><a href="{{ url_for('book_detail', book_id=book.id) }}">{{ book.title }}</a>{% if book.publication_year %} ({{ book.publication_year }}){% endif %}{% if book.rating %} — {{ book.rating }}/10{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>No books in the library yet.</p>
+  {% endif %}
+
+  <p style="margin-top: 1.5em;">
+    <a href="{{ url_for('add_author') }}">Add Author</a> |
+    <a href="{{ url_for('index') }}">Back to Library</a>
+  </p>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ book.title }}</title>
+  </head>
+  <body>
+  <p><a href="{{ url_for('index') }}">← Library</a></p>
+
+  <div style="display: flex; align-items: flex-start; gap: 1.5em; margin-top: 1em;">
+    {% if book.isbn %}
+    <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-L.jpg" alt="Cover {{ book.title }}" style="max-width: 200px; height: auto;" onerror="this.style.display='none'">
+    {% else %}
+    <div style="width: 200px; height: 280px; background: #eee; display: flex; align-items: center; justify-content: center; color: #666;">No cover</div>
+    {% endif %}
+    <div>
+      <h1>{{ book.title }}</h1>
+      <p><strong>Author:</strong> <a href="{{ url_for('author_detail', author_id=book.author.id) }}">{{ book.author.name }}</a></p>
+      {% if book.publication_year %}<p><strong>Publication year:</strong> {{ book.publication_year }}</p>{% endif %}
+      {% if book.isbn %}<p><strong>ISBN:</strong> {{ book.isbn }}</p>{% endif %}
+      {% if book.rating %}<p><strong>Rating:</strong> {{ book.rating }}/10</p>{% else %}<p><strong>Rating:</strong> —</p>{% endif %}
+    </div>
+  </div>
+
+  <p style="margin-top: 1.5em;">
+    <a href="{{ url_for('add_book') }}">Add Book</a> |
+    <a href="{{ url_for('index') }}">Back to Library</a>
+  </p>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
-from data_models import db, Author, Book
+from data.data_models import db, Author, Book
 
 app = Flask(__name__, template_folder="template")
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data/library.sqlite')}"
@@ -87,6 +87,19 @@ def index():
     return render_template(
         "home.html", books=books, sort=sort, search_query=search_query
     )
+
+
+@app.route("/book/<int:book_id>")
+def book_detail(book_id):
+    book = Book.query.get_or_404(book_id)
+    return render_template("book_detail.html", book=book)
+
+
+@app.route("/author/<int:author_id>")
+def author_detail(author_id):
+    author = Author.query.get_or_404(author_id)
+    books = author.books.order_by(Book.title).all()
+    return render_template("author_detail.html", author=author, books=books)
 
 
 @app.route("/book/<int:book_id>/delete", methods=["POST"])
