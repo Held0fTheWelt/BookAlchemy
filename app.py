@@ -1,6 +1,7 @@
 """
 BookAlchemy: Flask app for a digital library (authors, books, ratings, AI recommendations).
 """
+import argparse
 import json
 import os
 from datetime import datetime
@@ -24,6 +25,21 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 )
 app.config["SECRET_KEY"] = "change-me-in-production"
 db.init_app(app)
+
+class _DebugState:
+    """Holds debug flag set at startup (python app.py --debug). Default off."""
+
+    enabled = False
+
+    @classmethod
+    def is_enabled(cls):
+        """Return whether debug mode is on."""
+        return cls.enabled
+
+    @classmethod
+    def set_enabled(cls, value):
+        """Set debug mode on or off."""
+        cls.enabled = value
 
 
 def get_ai_recommendation(library_text):
@@ -82,7 +98,9 @@ def parse_date(value):
 
 
 def _debug_log(message, data=None, hypothesis_id="H1"):
-    """Append one NDJSON line to the debug log file."""
+    """Append one NDJSON line to the debug log file when debug mode is enabled."""
+    if not _DebugState.is_enabled():
+        return
     try:
         log_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "debug-e810f4.log"
@@ -256,5 +274,14 @@ def rate_book(book_id):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run BookAlchemy")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        default=False,
+        help="Enable Flask debug mode and debug log file",
+    )
+    args = parser.parse_args()
+    _DebugState.set_enabled(args.debug)
     _debug_log("app_run_start", {"host": "0.0.0.0", "port": 5002}, "H2")
-    app.run(debug=True, host="0.0.0.0", port=5002)
+    app.run(debug=args.debug, host="0.0.0.0", port=5002)
