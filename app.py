@@ -112,6 +112,9 @@ def add_book():
 
 @app.route("/")
 def index():
+    # #region agent log
+    _debug_log("index_request_received", {"path": "/"}, "H1")
+    # #endregion
     sort = request.args.get("sort", "title")
     search_query = request.args.get("q", "").strip()
 
@@ -201,5 +204,18 @@ def rate_book(book_id):
     return redirect(request.referrer or url_for("index"))
 
 
+# #region agent log
+def _debug_log(message, data=None, hypothesis_id="H1"):
+    try:
+        import json
+        log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "debug-e810f4.log")
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"sessionId": "e810f4", "message": message, "data": data or {}, "hypothesisId": hypothesis_id, "timestamp": datetime.now().isoformat()}) + "\n")
+    except Exception:
+        pass
+# #endregion
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5002)
+    _debug_log("app_run_start", {"host": "0.0.0.0", "port": 5002}, "H2")
+    # Listen on all interfaces so Codio's proxy can reach the app (avoids 502)
+    app.run(debug=True, host="0.0.0.0", port=5002)
