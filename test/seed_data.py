@@ -1,43 +1,56 @@
 """
 Seed script: populates the database with authors and books.
-Run from project root: python test/seed_data.py
+Run from project root: python -m test.seed_data
 """
-import sys
-from pathlib import Path
 from datetime import date
-
-# Add project root for imports
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app import app, db
 from data.data_models import Author, Book
 
 
 AUTHORS = [
-    {"name": "Jane Austen", "birth_date": date(1775, 12, 16), "date_of_death": date(1817, 7, 18)},
-    {"name": "George Orwell", "birth_date": date(1903, 6, 25), "date_of_death": date(1950, 1, 21)},
-    {"name": "Agatha Christie", "birth_date": date(1890, 9, 15), "date_of_death": date(1976, 1, 12)},
-    {"name": "Stephen King", "birth_date": date(1947, 9, 21), "date_of_death": None},
-    {"name": "Haruki Murakami", "birth_date": date(1949, 1, 12), "date_of_death": None},
-    {"name": "Ursula K. Le Guin", "birth_date": date(1929, 10, 21), "date_of_death": date(2018, 1, 22)},
-    {"name": "Terry Pratchett", "birth_date": date(1948, 4, 28), "date_of_death": date(2015, 3, 12)},
+    {"name": "Jane Austen", "birth_date": date(1775, 12, 16),
+     "date_of_death": date(1817, 7, 18)},
+    {"name": "George Orwell", "birth_date": date(1903, 6, 25),
+     "date_of_death": date(1950, 1, 21)},
+    {"name": "Agatha Christie", "birth_date": date(1890, 9, 15),
+     "date_of_death": date(1976, 1, 12)},
+    {"name": "Stephen King", "birth_date": date(1947, 9, 21),
+     "date_of_death": None},
+    {"name": "Haruki Murakami", "birth_date": date(1949, 1, 12),
+     "date_of_death": None},
+    {"name": "Ursula K. Le Guin", "birth_date": date(1929, 10, 21),
+     "date_of_death": date(2018, 1, 22)},
+    {"name": "Terry Pratchett", "birth_date": date(1948, 4, 28),
+     "date_of_death": date(2015, 3, 12)},
 ]
 
 BOOKS = [
-    {"title": "Pride and Prejudice", "isbn": "9780141439518", "publication_year": 1813, "author_index": 0},
-    {"title": "1984", "isbn": "9780451524935", "publication_year": 1949, "author_index": 1},
-    {"title": "Animal Farm", "isbn": "9780451526342", "publication_year": 1945, "author_index": 1},
-    {"title": "Murder on the Orient Express", "isbn": "9780062693662", "publication_year": 1934, "author_index": 2},
-    {"title": "The Shining", "isbn": "9780307743657", "publication_year": 1977, "author_index": 3},
-    {"title": "Norwegian Wood", "isbn": "9780375704024", "publication_year": 1987, "author_index": 4},
-    {"title": "Kafka on the Shore", "isbn": "9781400079278", "publication_year": 2002, "author_index": 4},
-    {"title": "The Left Hand of Darkness", "isbn": "9780441478125", "publication_year": 1969, "author_index": 5},
-    {"title": "Guards! Guards!", "isbn": "9780062225752", "publication_year": 1989, "author_index": 6},
-    {"title": "Good Omens", "isbn": "9780060853983", "publication_year": 1990, "author_index": 6},
+    {"title": "Pride and Prejudice", "isbn": "9780141439518",
+     "publication_year": 1813, "author_index": 0},
+    {"title": "1984", "isbn": "9780451524935",
+     "publication_year": 1949, "author_index": 1},
+    {"title": "Animal Farm", "isbn": "9780451526342",
+     "publication_year": 1945, "author_index": 1},
+    {"title": "Murder on the Orient Express", "isbn": "9780062693662",
+     "publication_year": 1934, "author_index": 2},
+    {"title": "The Shining", "isbn": "9780307743657",
+     "publication_year": 1977, "author_index": 3},
+    {"title": "Norwegian Wood", "isbn": "9780375704024",
+     "publication_year": 1987, "author_index": 4},
+    {"title": "Kafka on the Shore", "isbn": "9781400079278",
+     "publication_year": 2002, "author_index": 4},
+    {"title": "The Left Hand of Darkness", "isbn": "9780441478125",
+     "publication_year": 1969, "author_index": 5},
+    {"title": "Guards! Guards!", "isbn": "9780062225752",
+     "publication_year": 1989, "author_index": 6},
+    {"title": "Good Omens", "isbn": "9780060853983",
+     "publication_year": 1990, "author_index": 6},
 ]
 
 
 def seed():
+    """Insert AUTHORS and BOOKS into the database if it is empty."""
     with app.app_context():
         if Author.query.first():
             print("Database already contains data. No seed data inserted.")
