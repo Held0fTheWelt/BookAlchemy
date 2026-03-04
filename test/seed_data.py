@@ -1,12 +1,12 @@
 """
-Seed-Script: Legt Autoren und Bücher in der Datenbank an.
-Ausführung vom Projektroot: python test/seed_data.py
+Seed script: populates the database with authors and books.
+Run from project root: python test/seed_data.py
 """
 import sys
 from pathlib import Path
 from datetime import date
 
-# Projektroot für Imports
+# Add project root for imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app import app, db
@@ -40,7 +40,7 @@ BOOKS = [
 def seed():
     with app.app_context():
         if Author.query.first():
-            print("Datenbank enthält bereits Daten. Keine Seed-Daten eingefügt.")
+            print("Database already contains data. No seed data inserted.")
             return
         authors = []
         for a in AUTHORS:
@@ -57,7 +57,7 @@ def seed():
             )
             db.session.add(book)
         db.session.commit()
-        print(f"{len(authors)} Autoren und {len(BOOKS)} Bücher wurden angelegt.")
+        print(f"{len(authors)} authors and {len(BOOKS)} books created.")
 
 
 if __name__ == "__main__":
