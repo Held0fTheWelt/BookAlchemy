@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggest a Book</title>
+  </head>
+  <body>
+  <p><a href="{{ url_for('index') }}">← Library</a></p>
+
+  <h1>Suggest a Book to Read</h1>
+  <p>Get AI-powered recommendations based on the books in your library and your ratings.</p>
+  <p style="font-size: 0.9em; color: #666;">Tip: Set <code>OPENAI_API_KEY</code> in your environment (e.g. from <a href="https://platform.openai.com/api-keys">OpenAI</a> or a free <a href="https://rapidapi.com/hub">RapidAPI</a> ChatGPT API).</p>
+
+  <form method="post" action="{{ url_for('recommend') }}">
+    <button type="submit">Get recommendation</button>
+  </form>
+
+  {% if error %}
+  <div style="margin-top: 1em; padding: 0.75em; background: #fee; border: 1px solid #c00;">
+    <strong>Error:</strong> {{ error }}
+  </div>
+  {% endif %}
+
+  {% if recommendation %}
+  <div style="margin-top: 1.5em; padding: 1em; background: #f8f8f8; border: 1px solid #ddd; white-space: pre-wrap;">{{ recommendation }}</div>
+  {% endif %}
+  </body>
+</html>

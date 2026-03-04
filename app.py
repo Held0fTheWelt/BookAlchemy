@@ -1,12 +1,54 @@
 import os
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from data.data_models import db, Author, Book
 
 app = Flask(__name__, template_folder="template")
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data/library.sqlite')}"
 app.config["SECRET_KEY"] = "change-me-in-production"
 db.init_app(app)
+
+
+def get_ai_recommendation(library_text):
+    """
+    Call an AI API to get book recommendations. Uses OPENAI_API_KEY by default.
+    For a free tier with a hard limit, you can use OpenAI's free credits or
+    a RapidAPI ChatGPT API (set OPENAI_API_KEY and optionally OPENAI_BASE_URL).
+    Returns (recommendation_text, error_message). One of them is None.
+    """
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key or not api_key.strip():
+        return None, "No API key set. Set OPENAI_API_KEY in your environment (e.g. from OpenAI or a RapidAPI ChatGPT API)."
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key.strip())
+        response = client.chat.completions.create(
+            model=os.environ.get("OPENAI_MODEL", "gpt-3.5-turbo"),
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a friendly book recommender. Reply with 3–5 book suggestions only, with a short reason for each. Use clear formatting (e.g. bullet points or numbered list). Do not repeat books from the user's list.",
+                },
+                {
+                    "role": "user",
+                    "content": "Based on the following books in my library (and my ratings when given), suggest 3–5 books I might enjoy.\n\n" + library_text,
+                },
+            ],
+            max_tokens=500,
+        )
+        choice = response.choices[0]
+        if choice.message and choice.message.content:
+            return choice.message.content.strip(), None
+        return None, "Empty response from API."
+    except ImportError:
+        return None, "Install the openai package: pip install openai"
+    except Exception as e:
+        return None, str(e)
 
 
 def parse_date(value):
@@ -122,6 +164,26 @@ def delete_author(author_id):
     db.session.commit()
     flash("Author and all associated books were deleted successfully.", "success")
     return redirect(url_for("index"))
+
+
+@app.route("/recommend", methods=["GET", "POST"])
+def recommend():
+    recommendation = None
+    error = None
+    if request.method == "POST" or request.args.get("generate"):
+        books = Book.query.join(Author).order_by(Author.name, Book.title).all()
+        if not books:
+            error = "Add some books to your library first."
+        else:
+            lines = []
+            for b in books:
+                if b.rating is not None:
+                    lines.append(f"- {b.title} by {b.author.name} (rated {b.rating}/10)")
+                else:
+                    lines.append(f"- {b.title} by {b.author.name}")
+            library_text = "\n".join(lines)
+            recommendation, error = get_ai_recommendation(library_text)
+    return render_template("recommend.html", recommendation=recommendation, error=error)
 
 
 @app.route("/book/<int:book_id>/rate", methods=["POST"])
