@@ -6,11 +6,33 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
   </head>
   <body>
+  <p>
+    <a href="{{ url_for('add_author') }}">Add Author</a> |
+    <a href="{{ url_for('add_book') }}">Add Book</a>
+  </p>
 
-    {% for book in books %}
-    <div> <h3>{{ book.title }}</h3>
+  <form method="get" action="{{ url_for('index') }}" style="margin-bottom: 1em;">
+    <label for="sort">Sort by:</label>
+    <select name="sort" id="sort" onchange="this.form.submit()">
+      <option value="title" {{ 'selected' if sort == 'title' }}>Title</option>
+      <option value="author" {{ 'selected' if sort == 'author' }}>Author</option>
+    </select>
+  </form>
+
+  {% for book in books %}
+  <div style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1em;">
+    {% if book.isbn %}
+    <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" alt="Cover {{ book.title }}" style="max-width: 100px; height: auto;" onerror="this.style.display='none'">
+    {% else %}
+    <div style="width: 100px; height: 140px; background: #eee; display: flex; align-items: center; justify-content: center; color: #666;">No cover</div>
+    {% endif %}
+    <div>
+      <h3>{{ book.title }}</h3>
+      <p>{{ book.author.name }}</p>
+      {% if book.publication_year %}<p>{{ book.publication_year }}</p>{% endif %}
     </div>
-    {% endfor %}
+  </div>
+  {% endfor %}
 
   </body>
 </html>
