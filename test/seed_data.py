@@ -10,7 +10,7 @@ from datetime import date
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app import app, db
-from data_models import Author, Book
+from data.data_models import Author, Book
 
 
 AUTHORS = [
