@@ -24,13 +24,21 @@
     <input type="text" id="isbn" name="isbn"><br><br>
 
     <label for="publication_year">Publication Year:</label>
-    <input type="number" id="publication_year" name="publication_year" min="1" max="9999" placeholder="z.B. 2020"><br><br>
+    <input type="number" id="publication_year" name="publication_year" min="1" max="9999" placeholder="e.g. 2020"><br><br>
 
     <label for="author_id">Author:</label>
     <select id="author_id" name="author_id" required>
-      <option value="">-- Author wählen --</option>
+      <option value="">-- Select author --</option>
       {% for author in authors %}
         <option value="{{ author.id }}">{{ author.name }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label for="rating">Rating (1–10):</label>
+    <select id="rating" name="rating">
+      <option value="">-- No rating --</option>
+      {% for i in range(1, 11) %}
+        <option value="{{ i }}">{{ i }}</option>
       {% endfor %}
     </select><br><br>
 

@@ -23,7 +23,7 @@
 
   <form method="get" action="{{ url_for('index') }}" style="margin-bottom: 1em;">
     <label for="q">Search:</label>
-    <input type="text" id="q" name="q" value="{{ search_query }}" placeholder="Titel oder Autor...">
+    <input type="text" id="q" name="q" value="{{ search_query }}" placeholder="Title or author...">
     <input type="hidden" name="sort" value="{{ sort }}">
     <button type="submit">Search</button>
   </form>
@@ -38,7 +38,7 @@
   </form>
 
   {% if search_query and not books %}
-  <p>Es wurden keine Bücher gefunden, die zu „{{ search_query }}“ passen.</p>
+  <p>No books found matching "{{ search_query }}".</p>
   {% endif %}
 
   {% for book in books %}
@@ -52,12 +52,24 @@
       <h3>{{ book.title }}</h3>
       <div style="margin: 0.25em 0;">
         {{ book.author.name }}
-        <form method="post" action="{{ url_for('delete_author', author_id=book.author.id) }}" style="display: inline; margin-left: 0.5em;" onsubmit="return confirm('Autor „{{ book.author.name }}“ und alle zugehörigen Bücher wirklich löschen?');">
+        <form method="post" action="{{ url_for('delete_author', author_id=book.author.id) }}" style="display: inline; margin-left: 0.5em;" onsubmit="return confirm('Delete author \"{{ book.author.name }}\" and all their books?');">
           <button type="submit">Delete Author</button>
         </form>
       </div>
       {% if book.publication_year %}<p>{{ book.publication_year }}</p>{% endif %}
-      <form method="post" action="{{ url_for('delete_book', book_id=book.id) }}" style="margin-top: 0.5em;" onsubmit="return confirm('Buch wirklich löschen?');">
+      <p>
+        <label for="rate-{{ book.id }}">Rating (1–10):</label>
+        <form method="post" action="{{ url_for('rate_book', book_id=book.id) }}" style="display: inline;">
+          <select name="rating" id="rate-{{ book.id }}" onchange="this.form.submit()">
+            <option value="" {{ 'selected' if not book.rating }}>—</option>
+            {% for i in range(1, 11) %}
+              <option value="{{ i }}" {{ 'selected' if book.rating == i }}>{{ i }}</option>
+            {% endfor %}
+          </select>
+        </form>
+        {% if book.rating %}<span>{{ book.rating }}/10</span>{% endif %}
+      </p>
+      <form method="post" action="{{ url_for('delete_book', book_id=book.id) }}" style="margin-top: 0.5em;" onsubmit="return confirm('Delete this book?');">
         <button type="submit">Delete Book</button>
       </form>
     </div>

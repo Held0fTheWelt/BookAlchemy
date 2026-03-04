@@ -10,7 +10,7 @@ db.init_app(app)
 
 
 def parse_date(value):
-    """Form-String (YYYY-MM-DD) in date oder None umwandeln."""
+    """Convert form string (YYYY-MM-DD) to date or None."""
     if not value or not value.strip():
         return None
     try:
@@ -24,7 +24,7 @@ def add_author():
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         if not name:
-            flash("Bitte einen Namen angeben.", "error")
+            flash("Please enter a name.", "error")
             return render_template("add_author.html")
         author = Author(
             name=name,
@@ -33,7 +33,7 @@ def add_author():
         )
         db.session.add(author)
         db.session.commit()
-        flash("Autor wurde erfolgreich hinzugefügt.", "success")
+        flash("Author was added successfully.", "success")
         return redirect(url_for("add_author"))
     return render_template("add_author.html")
 
@@ -44,22 +44,26 @@ def add_book():
         title = request.form.get("title", "").strip()
         author_id = request.form.get("author_id", type=int)
         if not title:
-            flash("Bitte einen Buchtitel angeben.", "error")
+            flash("Please enter a book title.", "error")
             return render_template("add_book.html", authors=Author.query.order_by(Author.name).all())
         if not author_id or not Author.query.get(author_id):
-            flash("Bitte einen gültigen Autor auswählen.", "error")
+            flash("Please select a valid author.", "error")
             return render_template("add_book.html", authors=Author.query.order_by(Author.name).all())
         isbn = request.form.get("isbn", "").strip() or None
         pub_year = request.form.get("publication_year", type=int) or None
+        rating = request.form.get("rating", type=int) or None
+        if rating is not None and (rating < 1 or rating > 10):
+            rating = None
         book = Book(
             title=title,
             isbn=isbn,
             publication_year=pub_year,
+            rating=rating,
             author_id=author_id,
         )
         db.session.add(book)
         db.session.commit()
-        flash("Buch wurde erfolgreich hinzugefügt.", "success")
+        flash("Book was added successfully.", "success")
         return redirect(url_for("add_book"))
     return render_template("add_book.html", authors=Author.query.order_by(Author.name).all())
 
@@ -94,7 +98,7 @@ def delete_book(book_id):
     if author_book_count == 1:
         db.session.delete(author)
     db.session.commit()
-    flash("Das Buch wurde erfolgreich gelöscht.", "success")
+    flash("Book was deleted successfully.", "success")
     return redirect(url_for("index"))
 
 
@@ -103,8 +107,23 @@ def delete_author(author_id):
     author = Author.query.get_or_404(author_id)
     db.session.delete(author)
     db.session.commit()
-    flash("Der Autor und alle zugehörigen Bücher wurden erfolgreich gelöscht.", "success")
+    flash("Author and all associated books were deleted successfully.", "success")
     return redirect(url_for("index"))
+
+
+@app.route("/book/<int:book_id>/rate", methods=["POST"])
+def rate_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    rating = request.form.get("rating", type=int)
+    if rating is not None and 1 <= rating <= 10:
+        book.rating = rating
+    elif request.form.get("rating") == "":
+        book.rating = None
+    else:
+        return redirect(request.referrer or url_for("index"))
+    db.session.commit()
+    flash("Rating was saved.", "success")
+    return redirect(request.referrer or url_for("index"))
 
 
 if __name__ == "__main__":
