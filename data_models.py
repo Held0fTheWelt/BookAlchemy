@@ -25,7 +25,10 @@ class Book(db.Model):
     publication_year = db.Column(db.Integer, nullable=True)
     author_id = db.Column(db.Integer, db.ForeignKey("authors.id"), nullable=False)
 
-    author = db.relationship("Author", backref=db.backref("books", lazy="dynamic"))
+    author = db.relationship(
+        "Author",
+        backref=db.backref("books", lazy="dynamic", cascade="all, delete-orphan"),
+    )
 
     def __repr__(self):
         return f"<Book(id={self.id}, title={repr(self.title)})>"
