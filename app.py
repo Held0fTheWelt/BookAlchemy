@@ -85,5 +85,18 @@ def index():
     )
 
 
+@app.route("/book/<int:book_id>/delete", methods=["POST"])
+def delete_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    author = book.author
+    author_book_count = Book.query.filter_by(author_id=author.id).count()
+    db.session.delete(book)
+    if author_book_count == 1:
+        db.session.delete(author)
+    db.session.commit()
+    flash("Das Buch wurde erfolgreich gelöscht.", "success")
+    return redirect(url_for("index"))
+
+
 if __name__ == "__main__":
     app.run(debug=True)
