@@ -1,9 +1,12 @@
+"""SQLAlchemy models for Author and Book."""
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
 
 class Author(db.Model):
+    """Author model: name, birth_date, date_of_death."""
+
     __tablename__ = "authors"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255), nullable=False)
@@ -18,6 +21,8 @@ class Author(db.Model):
 
 
 class Book(db.Model):
+    """Book model: title, isbn, year, rating, linked to Author."""
+
     __tablename__ = "books"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     isbn = db.Column(db.String(20), unique=True, nullable=True)
