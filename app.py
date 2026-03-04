@@ -67,11 +67,22 @@ def add_book():
 @app.route("/")
 def index():
     sort = request.args.get("sort", "title")
+    search_query = request.args.get("q", "").strip()
+
+    query = Book.query.join(Author)
+    if search_query:
+        pattern = f"%{search_query}%"
+        query = query.filter(
+            db.or_(Book.title.ilike(pattern), Author.name.ilike(pattern))
+        )
     if sort == "author":
-        books = Book.query.join(Author).order_by(Author.name, Book.title).all()
+        books = query.order_by(Author.name, Book.title).all()
     else:
-        books = Book.query.order_by(Book.title).all()
-    return render_template("home.html", books=books, sort=sort)
+        books = query.order_by(Book.title).all()
+
+    return render_template(
+        "home.html", books=books, sort=sort, search_query=search_query
+    )
 
 
 if __name__ == "__main__":

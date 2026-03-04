@@ -12,12 +12,24 @@
   </p>
 
   <form method="get" action="{{ url_for('index') }}" style="margin-bottom: 1em;">
+    <label for="q">Search:</label>
+    <input type="text" id="q" name="q" value="{{ search_query }}" placeholder="Titel oder Autor...">
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <button type="submit">Search</button>
+  </form>
+
+  <form method="get" action="{{ url_for('index') }}" style="margin-bottom: 1em;">
     <label for="sort">Sort by:</label>
     <select name="sort" id="sort" onchange="this.form.submit()">
       <option value="title" {{ 'selected' if sort == 'title' }}>Title</option>
       <option value="author" {{ 'selected' if sort == 'author' }}>Author</option>
     </select>
+    {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
   </form>
+
+  {% if search_query and not books %}
+  <p>Es wurden keine Bücher gefunden, die zu „{{ search_query }}“ passen.</p>
+  {% endif %}
 
   {% for book in books %}
   <div style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1em;">
