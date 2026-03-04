@@ -1,31 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  </head>
-  <body>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul class="flashes">
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+{% extends "base.html" %}
 
-  <form action="/add_author" method="POST">
-  <label for="name">Author Name:</label> 
-  <input type="text" id="name" name="name" required><br><br>
-  
-  <label for="birthdate">Birthdate:</label> 
-  <input type="date" id="birthdate" name="birthdate" required><br><br> 
-  <label for="date_of_death">Date of Death:</label> 
-  <input type="date" id="date_of_death" name="date_of_death"><br><br>
-  <input type="submit" value="Add Author"> 
-  </form>
+{% block title %}Add Author · BookAlchemy{% endblock %}
 
-  </body>
-</html>
+{% block content %}
+  <div class="card panel">
+    <div class="panel-head">
+      <h2>Add an Author</h2>
+      <div class="muted">Create an author profile to keep your library tidy.</div>
+    </div>
+
+    <form class="form" action="/add_author" method="POST">
+      <div class="form-grid">
+        <div class="control">
+          <label for="name">Author name</label>
+          <input type="text" id="name" name="name" placeholder="e.g. Ursula K. Le Guin" required />
+        </div>
+
+        <div class="control">
+          <label for="birthdate">Birthdate</label>
+          <input type="date" id="birthdate" name="birthdate" required />
+        </div>
+
+        <div class="control" style="grid-column: 1 / -1;">
+          <label for="date_of_death">Date of death <span class="muted" style="font-weight: 650;">(optional)</span></label>
+          <input type="date" id="date_of_death" name="date_of_death" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Add author</button>
+        <a class="btn btn-ghost" href="{{ url_for('index') }}">Back to library</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

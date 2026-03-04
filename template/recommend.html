@@ -1,29 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suggest a Book</title>
-  </head>
-  <body>
-  <p><a href="{{ url_for('index') }}">← Library</a></p>
+{% extends "base.html" %}
 
-  <h1>Suggest a Book to Read</h1>
-  <p>Get AI-powered recommendations based on the books in your library and your ratings.</p>
-  <p style="font-size: 0.9em; color: #666;">Tip: Set <code>OPENAI_API_KEY</code> in your environment (e.g. from <a href="https://platform.openai.com/api-keys">OpenAI</a> or a free <a href="https://rapidapi.com/hub">RapidAPI</a> ChatGPT API).</p>
+{% block title %}Suggest · BookAlchemy{% endblock %}
 
-  <form method="post" action="{{ url_for('recommend') }}">
-    <button type="submit">Get recommendation</button>
-  </form>
+{% block content %}
+  <section class="hero">
+    <div class="hero-head">
+      <div>
+        <h1>Suggest a Book</h1>
+        <div class="muted">AI-powered recommendations based on the books (and ratings) in your library.</div>
+      </div>
+      <div class="badge">Experimental</div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-ghost" href="{{ url_for('index') }}">← Back</a>
+      <form method="post" action="{{ url_for('recommend') }}">
+        <button class="btn btn-primary" type="submit">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5L12 2Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M5 13l.8 2.7L8.5 16l-2.7.8L5 19.5l-.8-2.7L1.5 16l2.7-.3L5 13Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          Get recommendation
+        </button>
+      </form>
+    </div>
+
+    <div class="muted" style="font-size: 13px;">
+      Tip: set <code>OPENAI_API_KEY</code> in your environment.
+    </div>
+  </section>
 
   {% if error %}
-  <div style="margin-top: 1em; padding: 0.75em; background: #fee; border: 1px solid #c00;">
-    <strong>Error:</strong> {{ error }}
-  </div>
+    <div class="card panel" style="margin-top: 16px; border-color: color-mix(in srgb, var(--danger) 35%, var(--border));">
+      <div style="font-weight: 800;">Error</div>
+      <div class="muted" style="margin-top: 6px;">{{ error }}</div>
+    </div>
   {% endif %}
 
   {% if recommendation %}
-  <div style="margin-top: 1.5em; padding: 1em; background: #f8f8f8; border: 1px solid #ddd; white-space: pre-wrap;">{{ recommendation }}</div>
+    <div class="card panel" style="margin-top: 16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap: 10px;">
+        <div style="font-weight: 850; letter-spacing: -0.02em;">Recommendation</div>
+        <span class="badge">Generated</span>
+      </div>
+      <div style="margin-top: 10px; white-space: pre-wrap;">{{ recommendation }}</div>
+    </div>
   {% endif %}
-  </body>
-</html>
+{% endblock %}

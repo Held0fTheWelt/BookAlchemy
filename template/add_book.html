@@ -1,49 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  </head>
-  <body>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul class="flashes">
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+{% extends "base.html" %}
 
-  <form action="/add_book" method="POST">
-    <label for="title">Title:</label>
-    <input type="text" id="title" name="title" required><br><br>
+{% block title %}Add Book · BookAlchemy{% endblock %}
 
-    <label for="isbn">ISBN:</label>
-    <input type="text" id="isbn" name="isbn"><br><br>
+{% block content %}
+  <div class="card panel">
+    <div class="panel-head">
+      <h2>Add a Book</h2>
+      <div class="muted">Add title, author, and optional ISBN to fetch covers automatically.</div>
+    </div>
 
-    <label for="publication_year">Publication Year:</label>
-    <input type="number" id="publication_year" name="publication_year" min="1" max="9999" placeholder="e.g. 2020"><br><br>
+    <form class="form" action="/add_book" method="POST">
+      <div class="form-grid">
+        <div class="control" style="grid-column: 1 / -1;">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" placeholder="e.g. The Left Hand of Darkness" required />
+        </div>
 
-    <label for="author_id">Author:</label>
-    <select id="author_id" name="author_id" required>
-      <option value="">-- Select author --</option>
-      {% for author in authors %}
-        <option value="{{ author.id }}">{{ author.name }}</option>
-      {% endfor %}
-    </select><br><br>
+        <div class="control">
+          <label for="isbn">ISBN <span class="muted" style="font-weight: 650;">(optional)</span></label>
+          <input type="text" id="isbn" name="isbn" placeholder="e.g. 9780441478125" />
+        </div>
 
-    <label for="rating">Rating (1–10):</label>
-    <select id="rating" name="rating">
-      <option value="">-- No rating --</option>
-      {% for i in range(1, 11) %}
-        <option value="{{ i }}">{{ i }}</option>
-      {% endfor %}
-    </select><br><br>
+        <div class="control">
+          <label for="publication_year">Publication year <span class="muted" style="font-weight: 650;">(optional)</span></label>
+          <input type="number" id="publication_year" name="publication_year" min="1" max="9999" placeholder="e.g. 1969" />
+        </div>
 
-    <input type="submit" value="Add Book">
-  </form>
+        <div class="control" style="grid-column: 1 / -1;">
+          <label for="author_id">Author</label>
+          <select id="author_id" name="author_id" required>
+            <option value="">Select author…</option>
+            {% for author in authors %}
+              <option value="{{ author.id }}">{{ author.name }}</option>
+            {% endfor %}
+          </select>
+          <div class="muted" style="font-size: 13px; margin-top: 6px;">
+            Missing an author? <a href="{{ url_for('add_author') }}">Add one first</a>.
+          </div>
+        </div>
 
-  </body>
-</html>
+        <div class="control" style="grid-column: 1 / -1;">
+          <label for="rating">Rating <span class="muted" style="font-weight: 650;">(optional)</span></label>
+          <select id="rating" name="rating">
+            <option value="">Unrated</option>
+            {% for i in range(1, 11) %}
+              <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Add book</button>
+        <a class="btn btn-ghost" href="{{ url_for('index') }}">Back to library</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,81 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  </head>
-  <body>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul class="flashes">
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+{% extends "base.html" %}
 
-  <p>
-    <a href="{{ url_for('add_author') }}">Add Author</a> |
-    <a href="{{ url_for('add_book') }}">Add Book</a> |
-    <a href="{{ url_for('recommend') }}">Suggest a Book</a>
-  </p>
+{% block title %}Library · BookAlchemy{% endblock %}
 
-  <form method="get" action="{{ url_for('index') }}" style="margin-bottom: 1em;">
-    <label for="q">Search:</label>
-    <input type="text" id="q" name="q" value="{{ search_query }}" placeholder="Title or author...">
-    <input type="hidden" name="sort" value="{{ sort }}">
-    <button type="submit">Search</button>
-  </form>
+{% block content %}
+  <div class="list-books-title">
+    <h1>Your Library</h1>
+    <span class="list-books-count">{{ books|length }} books</span>
+  </div>
 
-  <form method="get" action="{{ url_for('index') }}" style="margin-bottom: 1em;">
-    <label for="sort">Sort by:</label>
-    <select name="sort" id="sort" onchange="this.form.submit()">
-      <option value="title" {{ 'selected' if sort == 'title' }}>Title</option>
-      <option value="author" {{ 'selected' if sort == 'author' }}>Author</option>
-    </select>
-    {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
-  </form>
+  <div class="library-toolbar">
+    <form class="searchbar-compact" method="get" action="{{ url_for('index') }}">
+      <input type="text" id="q" name="q" value="{{ search_query }}" placeholder="Search title or author…" />
+      <select name="sort" id="sort" onchange="this.form.submit()">
+        <option value="title" {{ 'selected' if sort == 'title' }}>Sort: Title</option>
+        <option value="author" {{ 'selected' if sort == 'author' }}>Sort: Author</option>
+      </select>
+      <button class="btn btn-primary" type="submit">Search</button>
+      {% if search_query %}
+        <a class="btn btn-ghost" href="{{ url_for('index', sort=sort) }}">Clear</a>
+      {% endif %}
+    </form>
+  </div>
 
   {% if search_query and not books %}
-  <p>No books found matching "{{ search_query }}".</p>
-  {% endif %}
-
-  {% for book in books %}
-  <div style="display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1em;">
-    {% if book.isbn %}
-    <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" alt="Cover {{ book.title }}" style="max-width: 100px; height: auto;" onerror="this.style.display='none'">
-    {% else %}
-    <div style="width: 100px; height: 140px; background: #eee; display: flex; align-items: center; justify-content: center; color: #666;">No cover</div>
-    {% endif %}
-    <div>
-      <h3><a href="{{ url_for('book_detail', book_id=book.id) }}">{{ book.title }}</a></h3>
-      <div style="margin: 0.25em 0;">
-        <a href="{{ url_for('author_detail', author_id=book.author.id) }}">{{ book.author.name }}</a>
-        <form method="post" action="{{ url_for('delete_author', author_id=book.author.id) }}" style="display: inline; margin-left: 0.5em;" onsubmit="return confirm('Delete author \"{{ book.author.name }}\" and all their books?');">
-          <button type="submit">Delete Author</button>
-        </form>
+    <main class="content">
+      <div class="empty-state">
+        No books found for <strong>{{ search_query }}</strong>.
+        <div style="margin-top: 10px;">
+          <a class="btn btn-primary" href="{{ url_for('add_book') }}">Add a new book</a>
+          <a class="btn btn-ghost" href="{{ url_for('index', sort=sort) }}">Back to library</a>
+        </div>
       </div>
-      {% if book.publication_year %}<p>{{ book.publication_year }}</p>{% endif %}
-      <p>
-        <label for="rate-{{ book.id }}">Rating (1–10):</label>
-        <form method="post" action="{{ url_for('rate_book', book_id=book.id) }}" style="display: inline;">
-          <select name="rating" id="rate-{{ book.id }}" onchange="this.form.submit()">
-            <option value="" {{ 'selected' if not book.rating }}>—</option>
-            {% for i in range(1, 11) %}
-              <option value="{{ i }}" {{ 'selected' if book.rating == i }}>{{ i }}</option>
-            {% endfor %}
-          </select>
-        </form>
-        {% if book.rating %}<span>{{ book.rating }}/10</span>{% endif %}
-      </p>
-      <form method="post" action="{{ url_for('delete_book', book_id=book.id) }}" style="margin-top: 0.5em;" onsubmit="return confirm('Delete this book?');">
-        <button type="submit">Delete Book</button>
-      </form>
-    </div>
-  </div>
-  {% endfor %}
-
-  </body>
-</html>
+    </main>
+  {% else %}
+    <main class="content">
+      <ol class="book-grid" aria-label="Books">
+        {% for book in books %}
+        <li>
+          <div class="book">
+            <a class="book-poster-link" href="{{ url_for('book_detail', book_id=book.id) }}" aria-label="Open {{ book.title }}">
+              <span class="book-poster-wrap">
+                {% if book.isbn %}
+                  <img
+                    class="book-poster"
+                    src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg"
+                    alt="Cover {{ book.title }}"
+                    onerror="this.style.display='none'; var s=this.nextElementSibling; if(s) s.classList.add('show');"
+                  />
+                  <span class="book-poster-placeholder">No cover</span>
+                {% else %}
+                  <span class="book-poster-placeholder show">No cover</span>
+                {% endif %}
+              </span>
+            </a>
+            <div class="book-title">
+              <a href="{{ url_for('book_detail', book_id=book.id) }}">{{ book.title }}</a>
+            </div>
+            <div class="book-author">
+              <a href="{{ url_for('author_detail', author_id=book.author.id) }}">{{ book.author.name }}</a>
+            </div>
+            <div class="book-year">{{ book.publication_year if book.publication_year else '—' }}</div>
+            <div class="book-rating">{{ book.rating if book.rating else '—' }}/10</div>
+            <div class="book-actions">
+              <form method="post" action="{{ url_for('rate_book', book_id=book.id) }}" class="book-rate-form">
+                <select name="rating" onchange="this.form.submit()" title="Rating">
+                  <option value="" {{ 'selected' if not book.rating }}>—</option>
+                  {% for i in range(1, 11) %}
+                    <option value="{{ i }}" {{ 'selected' if book.rating == i }}>{{ i }}</option>
+                  {% endfor %}
+                </select>
+              </form>
+              <a href="{{ url_for('book_detail', book_id=book.id) }}" class="book-action-link">Details</a>
+              <form method="post" action="{{ url_for('delete_book', book_id=book.id) }}" class="book-action-form" onsubmit="return confirm('Delete this book?');">
+                <button type="submit" class="book-action-btn" title="Delete book">⌫</button>
+              </form>
+              <form method="post" action="{{ url_for('delete_author', author_id=book.author.id) }}" class="book-action-form" onsubmit="return confirm('Delete author &amp; all their books?');">
+                <button type="submit" class="book-action-btn" title="Delete author">✕</button>
+              </form>
+            </div>
+          </div>
+        </li>
+        {% else %}
+        <li class="empty-grid-item">
+          <div class="empty-state">
+            <div style="font-weight: 800;">Your shelves are empty.</div>
+            <div style="margin-top: 6px;">Add your first author and book to begin.</div>
+            <div style="margin-top: 12px;">
+              <a class="btn btn-primary" href="{{ url_for('add_author') }}">Add author</a>
+              <a class="btn btn-ghost" href="{{ url_for('add_book') }}">Add book</a>
+            </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+    </main>
+  {% endif %}
+{% endblock %}

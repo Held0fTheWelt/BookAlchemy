@@ -1,31 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ book.title }}</title>
-  </head>
-  <body>
-  <p><a href="{{ url_for('index') }}">← Library</a></p>
+{% extends "base.html" %}
 
-  <div style="display: flex; align-items: flex-start; gap: 1.5em; margin-top: 1em;">
-    {% if book.isbn %}
-    <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-L.jpg" alt="Cover {{ book.title }}" style="max-width: 200px; height: auto;" onerror="this.style.display='none'">
-    {% else %}
-    <div style="width: 200px; height: 280px; background: #eee; display: flex; align-items: center; justify-content: center; color: #666;">No cover</div>
-    {% endif %}
-    <div>
-      <h1>{{ book.title }}</h1>
-      <p><strong>Author:</strong> <a href="{{ url_for('author_detail', author_id=book.author.id) }}">{{ book.author.name }}</a></p>
-      {% if book.publication_year %}<p><strong>Publication year:</strong> {{ book.publication_year }}</p>{% endif %}
-      {% if book.isbn %}<p><strong>ISBN:</strong> {{ book.isbn }}</p>{% endif %}
-      {% if book.rating %}<p><strong>Rating:</strong> {{ book.rating }}/10</p>{% else %}<p><strong>Rating:</strong> —</p>{% endif %}
+{% block title %}{{ book.title }} · Book · BookAlchemy{% endblock %}
+
+{% block content %}
+  <div class="card panel">
+    <div class="split">
+      <div class="card" style="box-shadow: none; border-radius: var(--radius);">
+        <div class="cover-wrap">
+          {% if book.isbn %}
+            <img
+              class="cover"
+              src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-L.jpg"
+              alt="Cover {{ book.title }}"
+              onerror="this.style.display='none'; this.insertAdjacentHTML && this.insertAdjacentHTML('afterend','<div class=\"cover placeholder\">No cover</div>');"
+            />
+          {% else %}
+            <div class="cover placeholder">No cover</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="details">
+        <div>
+          <h1>{{ book.title }}</h1>
+          <div class="muted" style="margin-top: 6px;">
+            by <a href="{{ url_for('author_detail', author_id=book.author.id) }}">{{ book.author.name }}</a>
+          </div>
+        </div>
+
+        <div class="kv">
+          <div class="kv-row">
+            <strong>Publication year</strong>
+            <span>{{ book.publication_year if book.publication_year else '—' }}</span>
+          </div>
+          <div class="kv-row">
+            <strong>ISBN</strong>
+            <span>{{ book.isbn if book.isbn else '—' }}</span>
+          </div>
+          <div class="kv-row">
+            <strong>Rating</strong>
+            <span>{{ book.rating if book.rating else '—' }}/10</span>
+          </div>
+        </div>
+
+        <form method="post" action="{{ url_for('rate_book', book_id=book.id) }}" class="form" style="margin-top: 4px;">
+          <div class="control">
+            <label for="rating">Update rating</label>
+            <select id="rating" name="rating" onchange="this.form.submit()">
+              <option value="" {{ 'selected' if not book.rating }}>Unrated</option>
+              {% for i in range(1, 11) %}
+                <option value="{{ i }}" {{ 'selected' if book.rating == i }}>{{ i }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="muted" style="font-size: 13px;">Changes are saved instantly.</div>
+        </form>
+
+        <div class="actions" style="margin-top: 6px;">
+          <a class="btn btn-ghost" href="{{ url_for('index') }}">← Back</a>
+          <a class="btn btn-ghost" href="{{ url_for('add_book') }}">Add another</a>
+          <form method="post" action="{{ url_for('delete_book', book_id=book.id) }}" onsubmit="return confirm('Delete this book?');">
+            <button class="btn btn-danger" type="submit">Delete book</button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-
-  <p style="margin-top: 1.5em;">
-    <a href="{{ url_for('add_book') }}">Add Book</a> |
-    <a href="{{ url_for('index') }}">Back to Library</a>
-  </p>
-  </body>
-</html>
+{% endblock %}

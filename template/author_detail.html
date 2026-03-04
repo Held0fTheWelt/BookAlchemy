@@ -1,31 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ author.name }}</title>
-  </head>
-  <body>
-  <p><a href="{{ url_for('index') }}">← Library</a></p>
+{% extends "base.html" %}
 
-  <h1>{{ author.name }}</h1>
-  {% if author.birth_date %}<p><strong>Birth date:</strong> {{ author.birth_date.strftime('%B %d, %Y') }}</p>{% endif %}
-  {% if author.date_of_death %}<p><strong>Date of death:</strong> {{ author.date_of_death.strftime('%B %d, %Y') }}</p>{% endif %}
+{% block title %}{{ author.name }} · Author · BookAlchemy{% endblock %}
 
-  <h2>Books ({{ books|length }})</h2>
-  {% if books %}
-  <ul>
+{% block content %}
+  <section class="hero">
+    <div class="hero-head">
+      <div>
+        <h1>{{ author.name }}</h1>
+        <div class="muted">
+          {% if author.birth_date %}Born {{ author.birth_date.strftime('%B %d, %Y') }}{% endif %}
+          {% if author.date_of_death %} • Died {{ author.date_of_death.strftime('%B %d, %Y') }}{% endif %}
+        </div>
+      </div>
+      <div class="badge">{{ books|length }} books</div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-ghost" href="{{ url_for('index') }}">← Back</a>
+      <a class="btn btn-ghost" href="{{ url_for('add_book') }}">Add book</a>
+      <form method="post" action="{{ url_for('delete_author', author_id=author.id) }}" onsubmit="return confirm('Delete author \"{{ author.name }}\" and all their books?');">
+        <button class="btn btn-danger" type="submit">Delete author</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="grid" aria-label="Books by author">
     {% for book in books %}
-    <li><a href="{{ url_for('book_detail', book_id=book.id) }}">{{ book.title }}</a>{% if book.publication_year %} ({{ book.publication_year }}){% endif %}{% if book.rating %} — {{ book.rating }}/10{% endif %}</li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p>No books in the library yet.</p>
-  {% endif %}
+      <article class="card book-card">
+        <a class="cover-wrap" href="{{ url_for('book_detail', book_id=book.id) }}" aria-label="Open {{ book.title }}">
+          {% if book.isbn %}
+            <img
+              class="cover"
+              src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg"
+              alt="Cover {{ book.title }}"
+              onerror="this.style.display='none'; this.insertAdjacentHTML && this.insertAdjacentHTML('afterend','<div class=\"cover placeholder\">No cover</div>');"
+            />
+          {% else %}
+            <div class="cover placeholder">No cover</div>
+          {% endif %}
+        </a>
 
-  <p style="margin-top: 1.5em;">
-    <a href="{{ url_for('add_author') }}">Add Author</a> |
-    <a href="{{ url_for('index') }}">Back to Library</a>
-  </p>
-  </body>
-</html>
+        <div class="card-body">
+          <div class="card-top">
+            <h3><a href="{{ url_for('book_detail', book_id=book.id) }}">{{ book.title }}</a></h3>
+            <span class="badge">{{ book.publication_year if book.publication_year else '—' }}</span>
+          </div>
+          <p class="byline">{{ author.name }}</p>
+          <div class="meta-row">
+            <span class="badge">Rating: {{ book.rating if book.rating else '—' }}/10</span>
+            <a class="btn btn-ghost" href="{{ url_for('book_detail', book_id=book.id) }}">Details</a>
+          </div>
+        </div>
+      </article>
+    {% else %}
+      <div class="empty-state" style="grid-column: 1 / -1;">
+        No books for this author yet.
+        <div style="margin-top: 12px;">
+          <a class="btn btn-primary" href="{{ url_for('add_book') }}">Add a book</a>
+        </div>
+      </div>
+    {% endfor %}
+  </section>
+{% endblock %}
